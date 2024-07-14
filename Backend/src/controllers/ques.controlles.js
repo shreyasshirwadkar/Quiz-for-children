@@ -93,7 +93,7 @@ if(!typeOfQuestion){
   
 })
 const correctans=asyncHandler(async(req,res)=>{
-  const{type,question,selectedOption,own}=req.body;
+  const{type,question,selectedOption,own}=req.query;
   if(!own){
     throw new ApiError(400, "Please provide owner of question");
   }

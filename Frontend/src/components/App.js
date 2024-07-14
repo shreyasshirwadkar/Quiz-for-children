@@ -1,8 +1,7 @@
 import "./styles/App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
-//import components
+// Import components
 import Main from "./Main";
 import Quiz from "./Quiz";
 import Result from "./Result";
@@ -11,42 +10,19 @@ import Signup from "./Signup";
 import QuestionInput from "./QuestionInput";
 import AuthPage from "./AuthPage";
 
-//react routes
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Main></Main>,
-  },
-  {
-    path: "/quiz",
-    element: <Quiz></Quiz>,
-  },
-  {
-    path: "/result",
-    element: <Result></Result>,
-  },
-  {
-    path: "/login",
-    element: <Login></Login>,
-  },
-  {
-    path: "/Signup",
-    element: <Signup></Signup>,
-  },
-  {
-    path: "/QuestionInput",
-    element: <QuestionInput></QuestionInput>,
-  },
-  {
-    path: "/auth",
-    element: <AuthPage></AuthPage>,
-  },
-]);
 function App() {
   return (
-    <>
-      <RouterProvider router={router} />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/quiz/:type" element={<Quiz />} />
+        <Route path="/result" element={<Result />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/questioninput" element={<QuestionInput />} />
+        <Route path="/auth" element={<AuthPage />} />
+      </Routes>
+    </Router>
   );
 }
 

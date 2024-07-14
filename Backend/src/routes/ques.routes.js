@@ -8,5 +8,5 @@ router.route("/postQuestion").post(verifyJWT,upload.fields([{
     maxCount:1
 }]),quesUpload)
 router.route("/getQuestion/:type").get(randomques)
-router.route("/checkAnswer").post(correctans)
+router.route("/checkAnswer").get(correctans)
 export default router
