@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./styles/AuthForm.css";
 
 const Login = () => {
@@ -12,15 +11,19 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/users/loginUser",
-        {
+      const response = await fetch("http://localhost:8000/api/v1/users/loginUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // This ensures cookies are sent with the request
+        body: JSON.stringify({
           userName: username,
           password: password,
-        },
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
+        })
+      });
+
+      if (response.ok) {
         setMessage("Login successful!");
         // Redirect to the question input page after a short delay
         setTimeout(() => {

@@ -10,7 +10,6 @@ import { uploadoncloudinary } from "../utils/cloudinary.utils.js";
 const quesUpload = asyncHandler(async (req, res) => {
   const { type, opt, correct } = req.body;
   const quesLocalPath=req.files?.ques[0].path
-
   // Validate required fields
   if (!type) {
     throw new ApiError(400, "Type is not defined");
@@ -18,7 +17,7 @@ const quesUpload = asyncHandler(async (req, res) => {
   if (!quesLocalPath) {
     throw new ApiError(400, "Question local path not defined");
   }
-  if (!opt || opt.length !== 4) {
+  if (!opt) {
     throw new ApiError(400, "Options should be an array of 4 elements");
   }
   if (!correct) {
@@ -29,30 +28,23 @@ const quesUpload = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Question not uploaded")
   }
    const quesUrl=question.url
-  // Find the user
-  const user = await User.findById(req.user?._id);
-  if (!user) {
-    throw new ApiError(400, "User not found");
-  }
-   // Check if there is already a type of question for the user
-  const typeOfQuestion = await Questions.findOne({ type, owner: user._id });
-
-  if (!typeOfQuestion) {     // Create a new type of question if it doesn't exist
-    const newQuestion = {
+   // Find the user
+   const user = await User.findById(req.user?._id);
+   if (!user) {
+     throw new ApiError(400, "User not found");
+    }
+    // Check if there is already a type of question for the user
+    const typeOfQuestion = await Questions.findOne({ type, owner: user._id });    
+    if (!typeOfQuestion) {  
+         // Create a new type of question if it doesn't exist
+        
+    const firstques = await Questions.create({
       type,
-      owner: req.user._id,
-      questions: [
-        {
-          quesUrl,
-          options:opt,
-         
-          
-          correct,
-        },
-      ],
-    };
+      owner:req.user?._id,
+      questions:[{question:quesUrl,options:JSON.parse(opt),correct:correct}]
 
-    const firstques = await Questions.create(newQuestion);
+      
+    });
 
     if (!firstques) {
       throw new ApiError(400, "Error in creating new type");
@@ -67,8 +59,8 @@ const quesUpload = asyncHandler(async (req, res) => {
 
   // Add new question to existing type
   typeOfQuestion.questions.push({
-    quesUrl,
-    options:opt,
+    question:quesUrl,
+    options:JSON.parse(opt),
     correct,
   });
 
@@ -81,7 +73,7 @@ const quesUpload = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, que, "Question added"));
  });
 const randomques=asyncHandler(async(req,res)=>{
-  const {type}=req.body
+  const {type}=req.params;
 if(!type){
   throw new ApiError(400, "Please provide type of question");
 
