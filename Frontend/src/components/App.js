@@ -9,6 +9,8 @@ import Login from "./Login";
 import Signup from "./Signup";
 import QuestionInput from "./QuestionInput";
 import AuthPage from "./AuthPage";
+import QuizzesList from "./QuizzesList";
+import QuizDashboard from "./QuizDashboard";
 
 function App() {
   return (
@@ -19,7 +21,11 @@ function App() {
         <Route path="/result" element={<Result />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/quizzes" element={<QuizzesList />} />
+        <Route path="/quiz/:quizType" element={<QuizDashboard />} />
         <Route path="/questioninput" element={<QuestionInput />} />
+        {/* <Route path="/edit-question/:questionId" element={<QuestionInput />} /> Implement this route if you need it */}
+        {/* <Route path="/add-question/:quizId" element={<QuestionInput />} /> Implement this route if you need it */}
         <Route path="/auth" element={<AuthPage />} />
       </Routes>
     </Router>
