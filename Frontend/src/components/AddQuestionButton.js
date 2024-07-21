@@ -6,7 +6,7 @@ import "./styles/AddQuestionButton.css"; // Create this CSS file for styling
 const AddQuestionButton = () => {
   return (
     <Link to="/auth" className="add-question-button">
-      Add Question
+      Login
     </Link>
   );
 };

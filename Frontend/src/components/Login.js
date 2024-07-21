@@ -27,7 +27,7 @@ const Login = () => {
         setMessage("Login successful!");
         // Redirect to the question input page after a short delay
         setTimeout(() => {
-          navigate("/QuestionInput");
+          navigate("/quizzes");
         }, 2000);
       } else {
         setMessage("Login failed. Please check your credentials and try again.");
