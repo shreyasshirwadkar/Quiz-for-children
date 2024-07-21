@@ -8,7 +8,8 @@ import { ApiResponse } from "../utils/apiResponse.utils.js";
 import { uploadoncloudinary } from "../utils/cloudinary.utils.js";
 
 const quesUpload = asyncHandler(async (req, res) => {
-  const { type, opt, correct } = req.body;
+  const {type}=req.params;
+  const {opt, correct } = req.body;
   const quesLocalPath=req.files?.ques[0].path
   // Validate required fields
   if (!type) {

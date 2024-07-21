@@ -3,7 +3,7 @@ import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { correctans, deleteQues, getQuestionInfo, quesUpload, randomques, showQuestion } from "../controllers/ques.controlles.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 const router=Router()
-router.route("/postQuestion").post(verifyJWT,upload.fields([{
+router.route("/postQuestion/:type").post(verifyJWT,upload.fields([{
     name:"ques",
     maxCount:1
 }]),quesUpload)
