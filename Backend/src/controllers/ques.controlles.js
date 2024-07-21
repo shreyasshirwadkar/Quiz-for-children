@@ -169,6 +169,66 @@ const getQuestionInfo=asyncHandler(async(req,res)=>{
 
 
     })
+    const updateQues = asyncHandler(async (req, res) => {
+      const { type, question_id } = req.params;
+      const { opt, correct } = req.body;
+      const file = req.files?.ques?.[0]?.path;
+    
+      if (!type) {
+        throw new ApiError(400, "Please provide the type of question");
+      }
+      if (!question_id) {
+        throw new ApiError(400, "Please provide the question ID");
+      }
+      if (!opt) {
+        throw new ApiError(400, "Please provide options");
+      }
+      if (!correct) {
+        throw new ApiError(400, "Please provide the correct option");
+      }
+    
+      const user = await User.findById(req.user?._id);
+      if (!user) {
+        throw new ApiError(400, "User not found");
+      }
+    
+      const typeOfQuestion = await Questions.findOne({
+        type,
+        owner: user._id,
+      });
+    
+      if (!typeOfQuestion) {
+        throw new ApiError(400, "No questions of this type exist");
+      }
+    
+      const questionIndex = typeOfQuestion.questions.findIndex(
+        (q) => q._id.toString() === question_id
+      );
+      if (questionIndex === -1) {
+        throw new ApiError(400, "No question of this type exist");
+      }
+    
+      let quesUrl = typeOfQuestion.questions[questionIndex].question;
+      if (file) {
+        const question = await uploadoncloudinary(file);
+        if (!question.url) {
+          throw new ApiError(400, "Question not uploaded");
+        }
+        quesUrl = question.url;
+      }
+    
+      typeOfQuestion.questions[questionIndex].question = quesUrl;
+      typeOfQuestion.questions[questionIndex].options = opt;
+      typeOfQuestion.questions[questionIndex].correct = correct;
+    
+      await typeOfQuestion.save({ validateBeforeSave: false });
+    
+      const updatedQuestion = typeOfQuestion.questions[questionIndex];
+    
+      return res
+        .status(200)
+        .json(new ApiResponse(200, updatedQuestion, "Question updated successfully"));
+    });
 const deleteQues=asyncHandler(async(req,res)=>{
   const{type,question_id}=req.params;
   if(!type){
@@ -235,4 +295,4 @@ const addQuizType=asyncHandler(async(req,res)=>{
           }
           return res.status(200).json(new ApiResponse(200,newQuizType,"Quiz type created successfully!!!"))
 })
-export { quesUpload,randomques,correctans,showQuestion,getQuestionInfo,deleteQues,getQuiztypes,addQuizType};
+export { quesUpload,randomques,correctans,showQuestion,updateQues,getQuestionInfo,deleteQues,getQuiztypes,addQuizType};
