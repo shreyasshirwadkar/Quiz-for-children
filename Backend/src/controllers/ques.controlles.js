@@ -41,7 +41,7 @@ const quesUpload = asyncHandler(async (req, res) => {
     const firstques = await Questions.create({
       type,
       owner:req.user?._id,
-      questions:[{question:quesUrl,options:JSON.parse(opt),correct:correct}]
+      questions:[{question:quesUrl,options:opt,correct:correct}]
 
       
     });
@@ -60,7 +60,7 @@ const quesUpload = asyncHandler(async (req, res) => {
   // Add new question to existing type
   typeOfQuestion.questions.push({
     question:quesUrl,
-    options:JSON.parse(opt),
+    options:opt,
     correct,
   });
 
@@ -120,4 +120,51 @@ const correctans=asyncHandler(async(req,res)=>{
       }
 
 })
-export { quesUpload,randomques,correctans};
+const showQuestion=asyncHandler(async(req,res)=>{
+  const{type}=req.params;
+  if(!type){
+    throw new ApiError(400, "Please provide type of question");
+    }
+  const user=await User.findById(req.user?._id)
+  if(!user){
+    throw new ApiError(400, "User not found");
+    }
+    const typeOfQuestion=await Questions.findOne({$and:[{type},{owner:user._id}]})
+    if(!typeOfQuestion){
+      throw new ApiError(400, "No questions of this type exist");
+      }
+      const questionOfThisType=await typeOfQuestion.questions
+      if(questionOfThisType.length===0){
+        throw new ApiError(400, "No questions are uploaded");
+      }
+      return res.status(200).json(new ApiResponse(200,questionOfThisType,"Question fetched successfully!!!"))
+})
+const getQuestionInfo=asyncHandler(async(req,res)=>{
+  const{type,question_id}=req.params;
+  if(!type){
+    throw new ApiError(400, "Please provide type of question");
+    }
+    if(!question_id){
+      throw new ApiError(400, "Please provide question id");
+      }
+    const user=await User.findById(req.user?._id);
+    if(!user){
+      throw new ApiError(400, "User not found");
+      }
+      const typeOfQuestion=await Questions.findOne({$and:[{type},{owner:user._id}]})
+      if(!typeOfQuestion){
+        throw new ApiError(400, "No questions of this type exist");
+        }
+        const questionOfThisType=await typeOfQuestion.questions.find(q => q._id === question_id
+          )
+          if(!questionOfThisType){
+            throw new ApiError(400, "No question of this type exist");
+            }
+            return res.status(200).json(new ApiResponse(200,questionOfThisType,"Question fetched successfully!!!"))
+
+
+
+
+
+    })
+export { quesUpload,randomques,correctans,showQuestion,getQuestionInfo};
