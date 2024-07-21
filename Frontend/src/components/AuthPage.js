@@ -11,7 +11,7 @@ const AuthPage = () => {
         <Link to="/login" className="auth-button">
           Login
         </Link>
-        <Link to="/signup" className="auth-button">
+        <Link to="/signup" className="auth-button"> 
           Signup
         </Link>
       </div>

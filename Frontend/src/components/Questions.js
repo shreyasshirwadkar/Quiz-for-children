@@ -12,7 +12,7 @@ export default function Questions({ question }) {
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
-    if (option === question.correctanswer) {
+    if (option === question.correct ) {
       setIsHAPPYVisible(true);
       setTimeout(() => setIsHAPPYVisible(false), 3000);
       setIsHAPPY2Visible(true);

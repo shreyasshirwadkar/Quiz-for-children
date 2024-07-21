@@ -85,11 +85,10 @@ if(!typeOfQuestion){
   if(!randomques){
     throw new ApiError(400,"Error in finding random question")
   }
-  const { correct, ...questionWithoutCorrect } = randomques._doc;
-  const owner=typeOfQuestion.owner
+  const questionWithoutCorrect  = randomques;
   return res.status(200)
   
-  .json(new ApiResponse(200, {questionWithoutCorrect,owner}, "Random question found"));
+  .json(new ApiResponse(200, {questionWithoutCorrect}, "Random question found"));
   
 })
 const correctans=asyncHandler(async(req,res)=>{
