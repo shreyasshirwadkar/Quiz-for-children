@@ -24,11 +24,6 @@ const quesUpload = asyncHandler(async (req, res) => {
   if (!correct) {
     throw new ApiError(400, "Correct answer is not defined");
   }
-  const question=await uploadoncloudinary(quesLocalPath)
-  if(!question.url){
-    throw new ApiError(400, "Question not uploaded")
-  }
-   const quesUrl=question.url
    // Find the user
    const user = await User.findById(req.user?._id);
    if (!user) {
@@ -37,28 +32,35 @@ const quesUpload = asyncHandler(async (req, res) => {
     // Check if there is already a type of question for the user
     const typeOfQuestion = await Questions.findOne({ type, owner: user._id });    
     if (!typeOfQuestion) {  
+      throw new ApiError(400, "Type of quiz not found");
          // Create a new type of question if it doesn't exist
         
-    const firstques = await Questions.create({
-      type,
-      owner:req.user?._id,
-      questions:[{question:quesUrl,options:opt,correct:correct}]
+  //   const firstques = await Questions.create({
+  //     type,
+  //     owner:req.user?._id,
+  //     questions:[{question:quesUrl,options:opt,correct:correct}]
 
       
-    });
+  //   });
 
-    if (!firstques) {
-      throw new ApiError(400, "Error in creating new type");
-    }    // Respond with success message
-    const que = await Questions.findById(firstques._id).select(
-      "-questions.correct"
-    );
-    return res
-      .status(200)
-      .json(new ApiResponse(200, que, "New type of question created"));
-  }
+  //   if (!firstques) {
+  //     throw new ApiError(400, "Error in creating new type");
+  //   }    // Respond with success message
+  //   const que = await Questions.findById(firstques._id).select(
+  //     "-questions.correct"
+  //   );
+  //   return res
+  //     .status(200)
+  //     .json(new ApiResponse(200, que, "New type of question created"));
+   }
 
   // Add new question to existing type
+  const question=await uploadoncloudinary(quesLocalPath)
+  if(!question.url){
+    throw new ApiError(400, "Question not uploaded")
+  }
+   const quesUrl=question.url
+  
   typeOfQuestion.questions.push({
     question:quesUrl,
     options:opt,
@@ -197,4 +199,40 @@ const deleteQues=asyncHandler(async(req,res)=>{
 
 
 })
-export { quesUpload,randomques,correctans,showQuestion,getQuestionInfo,deleteQues};
+const getQuiztypes=asyncHandler(async(req,res)=>{
+  const user=await User.findById(req.user?._id)
+  if(!user){
+    throw new ApiError(400, "User not found");
+    }
+    const quizTypes=await Questions.find({owner:user._id})
+    if(!quizTypes){
+      throw new ApiError(400, "No quiz types exist");
+      }
+      const quizes={};
+      quizTypes.forEach((quizType)=>{
+        quizes[quizType.type]=quizType.questions.length
+        })
+
+      return res.status(200).json(new ApiResponse(200,quizes,"Quiz types fetched successfully!!!"))
+
+})
+const addQuizType=asyncHandler(async(req,res)=>{
+  const{type}=req.body;
+  if(!type){
+    throw new ApiError(400, "Please provide type of question");
+    }
+    const user=await User.findById(req.user?._id)
+    if(!user){
+      throw new ApiError(400, "User not found");
+      }
+      const typeOfQuestion=await Questions.findOne({$and:[{type},{owner:user._id}]})
+      if(typeOfQuestion){
+        throw new ApiError(400, "Quiz type already exist");
+        }
+        const newQuizType=await Questions.create({type,owner:user._id});
+        if(!newQuizType){
+          throw new ApiError(400, "Quiz type not created");
+          }
+          return res.status(200).json(new ApiResponse(200,newQuizType,"Quiz type created successfully!!!"))
+})
+export { quesUpload,randomques,correctans,showQuestion,getQuestionInfo,deleteQues,getQuiztypes,addQuizType};
