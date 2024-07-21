@@ -155,8 +155,7 @@ const getQuestionInfo=asyncHandler(async(req,res)=>{
       if(!typeOfQuestion){
         throw new ApiError(400, "No questions of this type exist");
         }
-        const questionOfThisType=await typeOfQuestion.questions.find(q => q._id === question_id
-          )
+        const questionOfThisType=await typeOfQuestion.questions.find(q => q._id.toString()=== question_id)
           if(!questionOfThisType){
             throw new ApiError(400, "No question of this type exist");
             }
@@ -167,4 +166,34 @@ const getQuestionInfo=asyncHandler(async(req,res)=>{
 
 
     })
-export { quesUpload,randomques,correctans,showQuestion,getQuestionInfo};
+const deleteQues=asyncHandler(async(req,res)=>{
+  const{type,question_id}=req.params;
+  if(!type){
+    throw new ApiError(400, "Please provide type of question");
+    }
+    if(!question_id){
+      throw new ApiError(400, "Please provide question id");
+      }
+      const user=await User.findById(req.user?._id)
+      if(!user){
+        throw new ApiError(400, "User not found");
+        }
+        const typeOfQuestion=await Questions.findOne({$and:[{type},{owner:user._id}]})
+        if(!typeOfQuestion){
+          throw new ApiError(400, "No questions of this type exist");
+          }
+          const questionOfThisType=await typeOfQuestion.questions.find(q => q._id.toString()
+          === question_id)
+          if(!questionOfThisType){
+            throw new ApiError(400, "No question of this type exist");
+            }
+            const quesDel=await typeOfQuestion.questions.remove(questionOfThisType)
+            await typeOfQuestion.save();
+            if(!quesDel){
+              throw new ApiError(400, "Question not deleted");
+            }
+            return res.status(200).json(new ApiResponse(200,quesDel,"Question deleted successfully!!!"))
+
+
+})
+export { quesUpload,randomques,correctans,showQuestion,getQuestionInfo,deleteQues};
