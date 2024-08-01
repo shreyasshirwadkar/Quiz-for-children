@@ -8,8 +8,9 @@ const AddQuestion = () => {
   const [questionImage, setQuestionImage] = useState(null);
   const [questionImagePreview, setQuestionImagePreview] = useState(null);
   const [options, setOptions] = useState(["", "", "", ""]);
-  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState(""); // Update state to hold selected option
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const handleOptionChange = (index, value) => {
     const newOptions = [...options];
@@ -25,19 +26,21 @@ const AddQuestion = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when the form is submitted
     const formData = new FormData();
     formData.append("ques", questionImage);
-    options.forEach((option, index) => {
-      formData.append(`opt${index + 1}`, option);
-    });
-    formData.append("correct", correctAnswer);
+    formData.append("opt", JSON.stringify(options)); // Stringify options array
+    formData.append("correct", correctAnswer); // Send the selected correct answer
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/question/postQuestion/${quizType}`, {
-        method: "POST",
-        body: formData,
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/v1/question/postQuestion/${quizType}`,
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,6 +50,8 @@ const AddQuestion = () => {
     } catch (error) {
       console.error("Error adding question:", error);
       setError("Error adding question.");
+    } finally {
+      setLoading(false); // Set loading to false when the request is completed
     }
   };
 
@@ -55,7 +60,10 @@ const AddQuestion = () => {
       <h2>Add New Question</h2>
       <h3>Quiz Type: {quizType}</h3>
       {error && <p className="error">{error}</p>}
-      <button onClick={() => navigate(`/quiz-dashboard/${quizType}`)} className="back-button">
+      <button
+        onClick={() => navigate(`/quiz-dashboard/${quizType}`)}
+        className="back-button"
+      >
         Back to Dashboard
       </button>
       <form onSubmit={handleSubmit}>
@@ -69,7 +77,11 @@ const AddQuestion = () => {
           />
           {questionImagePreview && (
             <div className="image-preview">
-              <img src={questionImagePreview} alt="Question Preview" />
+              <img
+                src={questionImagePreview}
+                alt="Question Preview"
+                style={{ width: "200px", height: "200px" }}
+              />
             </div>
           )}
         </div>
@@ -87,14 +99,22 @@ const AddQuestion = () => {
         </div>
         <div className="form-group">
           <label>Correct Answer:</label>
-          <input
-            type="text"
+          <select
             value={correctAnswer}
             onChange={(e) => setCorrectAnswer(e.target.value)}
             required
-          />
+          >
+            <option value="">Select correct answer</option>
+            {options.map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </div>
-        <button type="submit" className="submit-button">Add Question</button>
+        <button type="submit" className="submit-button" disabled={loading}>
+          {loading ? "Loading..." : "Add Question"}
+        </button>
       </form>
     </div>
   );

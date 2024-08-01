@@ -11,8 +11,9 @@ import QuestionInput from "./QuestionInput";
 import AuthPage from "./AuthPage";
 import QuizzesList from "./QuizzesList";
 import QuizDashboard from "./QuizDashboard";
-import AddQuestion  from "./AddQuestion";
+import AddQuestion from "./AddQuestion";
 import EditQuestion from "./EditQuestion";
+import AddQuiz from "./AddQuiz"; // Adjust import as needed
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           element={<EditQuestion />}
         />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/add-quiz" element={<AddQuiz />} />
       </Routes>
     </Router>
   );

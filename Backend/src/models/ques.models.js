@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 const quesSchema = mongoose.Schema(
     {
+        quizTypeUrl: {
+            type: String,
+            required: true,
+        },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -11,16 +15,16 @@ const quesSchema = mongoose.Schema(
             required: true,
         },
         questions: [
-            {   question: {
+            {
+                question: {
                     type: String,
                     required: true,
                 },
                 options: [
                     {
-                            type: String,
-                            required:true
+                        type: String,
+                        required: true,
                     },
-                    
                 ],
                 correct: {
                     type: String,
@@ -32,5 +36,3 @@ const quesSchema = mongoose.Schema(
     { timestamps: true }
 );
 export const Questions = mongoose.model("Questions", quesSchema);
-
-

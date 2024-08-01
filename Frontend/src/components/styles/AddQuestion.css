@@ -10,7 +10,8 @@
   margin: 0 auto;
 }
 
-h2, h3 {
+h2,
+h3 {
   margin: 10px 0;
 }
 
@@ -33,7 +34,8 @@ input[type="text"] {
   border: 1px solid #ccc;
 }
 
-.submit-button, .back-button {
+.submit-button,
+.back-button {
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
@@ -47,18 +49,23 @@ input[type="text"] {
   background-color: #6c757d;
 }
 
-.submit-button:hover, .back-button:hover {
+.submit-button:hover,
+.back-button:hover {
   background-color: #0056b3;
 }
 
 .back-button:hover {
   background-color: #5a6268;
 }
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
 
 .image-preview {
   margin-top: 10px;
-  width: 300px;  /* Fixed width */
-  height: 300px;  /* Fixed height */
+  width: 300px; /* Fixed width */
+  height: 300px; /* Fixed height */
   display: flex;
   justify-content: center;
   align-items: center;

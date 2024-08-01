@@ -5,7 +5,7 @@
 .add-question-button {
   margin-bottom: 20px;
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   cursor: pointer;
@@ -28,7 +28,7 @@
 }
 
 .question-image {
-  width: 100px;  /* Set a fixed width */
+  width: 100px; /* Set a fixed width */
   height: 100px; /* Set a fixed height */
   object-fit: cover; /* Maintain aspect ratio, cover the box */
   margin-bottom: 10px;
@@ -52,6 +52,11 @@
   border-radius: 3px;
 }
 
+.correct-answer {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
 .question-actions {
   display: flex;
   gap: 10px;
@@ -65,4 +70,17 @@
 
 .action-icon:hover {
   color: #000;
+}
+.logout-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  float: right;
+}
+
+.logout-button:hover {
+  background-color: #e60000;
 }

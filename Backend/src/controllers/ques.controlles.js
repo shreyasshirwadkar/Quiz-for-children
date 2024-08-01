@@ -21,6 +21,10 @@ const quesUpload = asyncHandler(async (req, res) => {
     if (!opt) {
         throw new ApiError(400, "Options should be an array of 4 elements");
     }
+    const optionsArray = JSON.parse(opt);
+    if (!Array.isArray(optionsArray) || optionsArray.length !== 4) {
+        throw new ApiError(400, "Options should be an array of 4 elements");
+    }
     if (!correct) {
         throw new ApiError(400, "Correct answer is not defined");
     }
@@ -153,9 +157,9 @@ const showQuestion = asyncHandler(async (req, res) => {
         throw new ApiError(400, "No questions of this type exist");
     }
     const questionOfThisType = await typeOfQuestion.questions;
-    if (questionOfThisType.length === 0) {
-        throw new ApiError(400, "No questions are uploaded");
-    }
+    // if (questionOfThisType.length === 0) {
+    //     throw new ApiError(400, "No questions are uploaded");
+    // }
     return res
         .status(200)
         .json(
@@ -249,7 +253,7 @@ const updateQues = asyncHandler(async (req, res) => {
     }
 
     typeOfQuestion.questions[questionIndex].question = quesUrl;
-    typeOfQuestion.questions[questionIndex].options = opt;
+    typeOfQuestion.questions[questionIndex].options = JSON.parse(opt);
     typeOfQuestion.questions[questionIndex].correct = correct;
 
     await typeOfQuestion.save({ validateBeforeSave: false });
@@ -323,6 +327,10 @@ const getQuiztypes = asyncHandler(async (req, res) => {
 });
 const addQuizType = asyncHandler(async (req, res) => {
     const { type } = req.body;
+    const quizImage = req.files?.quizImage[0].path;
+    if (!quizImage) {
+        throw new ApiError(400, "Please provide quiz image");
+    }
     if (!type) {
         throw new ApiError(400, "Please provide type of question");
     }
@@ -336,7 +344,16 @@ const addQuizType = asyncHandler(async (req, res) => {
     if (typeOfQuestion) {
         throw new ApiError(400, "Quiz type already exist");
     }
-    const newQuizType = await Questions.create({ type, owner: user._id });
+    const quizImageUploaded = await uploadoncloudinary(quizImage);
+    if (!quizImageUploaded) {
+        throw new ApiError(400, "Quiz image not uploaded");
+    }
+    const quizImageUrl = quizImageUploaded.url;
+    const newQuizType = await Questions.create({
+        type,
+        owner: user._id,
+        quizTypeUrl: quizImageUrl,
+    });
     if (!newQuizType) {
         throw new ApiError(400, "Quiz type not created");
     }
@@ -350,6 +367,69 @@ const addQuizType = asyncHandler(async (req, res) => {
             )
         );
 });
+const deleteQuizType = asyncHandler(async (req, res) => {
+    const { type } = req.params;
+    if (!type) {
+        throw new ApiError(400, "Please provide type of question");
+    }
+    const user = await User.findById(req.user?._id);
+    if (!user) {
+        throw new ApiError(400, "User not found");
+    }
+    const quizType = await Questions.findOne({
+        $and: [{ type }, { owner: user._id }],
+    });
+    if (!quizType) {
+        throw new ApiError(400, "Quiz type not found");
+    }
+    await Questions.deleteOne({ _id: quizType._id });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Quiz type deleted successfully!!!"));
+});
+const editQuizName = asyncHandler(async (req, res) => {
+    const { type } = req.params;
+    const { name } = req.body;
+    if (!name) {
+        throw new ApiError(400, "Please provide name of quiz type");
+    }
+    if (!type) {
+        throw new ApiError(400, "Please provide type of question");
+    }
+    const user = await User.findById(req.user?._id);
+    if (!user) {
+        throw new ApiError(400, "User not found");
+    }
+    const quizType = await Questions.findOne({
+        $and: [{ type }, { owner: user._id }],
+    });
+    if (!quizType) {
+        throw new ApiError(400, "Quiz type not found");
+    }
+    const editedType = await Questions.updateOne(
+        { _id: quizType._id },
+        { $set: { type: name } }
+    );
+    if (!editedType) {
+        throw new ApiError(400, "Error inn editing the type of quiz");
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, editedType, "Quiz type edited successfully")
+        );
+});
+const showAllQuizType = asyncHandler(async (req, res) => {
+    const quizTypes = await Questions.find({}).select("type quizTypeUrl"); // Selecting only the 'type' and 'name' fields
+
+    // Respond with the retrieved quiz types
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, quizTypes, "Quiz types fetched successfully!")
+        );
+});
+
 export {
     quesUpload,
     randomques,
@@ -360,4 +440,7 @@ export {
     deleteQues,
     getQuiztypes,
     addQuizType,
+    deleteQuizType,
+    editQuizName,
+    showAllQuizType,
 };

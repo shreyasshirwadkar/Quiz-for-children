@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "./styles/EditQuestion.css"; // Create a stylesheet for EditQuestion
+import "./styles/EditQuestion.css";
 
 const EditQuestion = () => {
   const { quizType, questionId } = useParams();
   const navigate = useNavigate();
-  const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", "", "", ""]);
+  const [correctOption, setCorrectOption] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchQuestionDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/${quizType}/${questionId}`,
+          `http://localhost:8000/api/v1/question/Questioninfo/${quizType}/${questionId}`,
           {
             credentials: "include",
           }
@@ -23,9 +25,11 @@ const EditQuestion = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        setQuestion(data.question);
-        setOptions(data.options);
+        const { data } = await response.json(); // Access data directly
+        console.log("Fetched data:", data); // Check data structure
+        setOptions(data.options || ["", "", "", ""]);
+        setCorrectOption(data.correct || "");
+        setImagePreview(data.question || "");
       } catch (error) {
         console.error("Error fetching question details:", error);
         setError("Error fetching question details.");
@@ -41,17 +45,29 @@ const EditQuestion = () => {
     setOptions(newOptions);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    if (file) {
+      formData.append("ques", file);
+    }
+    formData.append("opt", JSON.stringify(options));
+    formData.append("correct", correctOption);
+
     try {
       const response = await fetch(
         `http://localhost:8000/api/v1/question/updateQues/${quizType}/${questionId}`,
         {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ question, options }),
+          method: "POST",
+          body: formData,
           credentials: "include",
         }
       );
@@ -73,25 +89,42 @@ const EditQuestion = () => {
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Question:</label>
-          <input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
           <label>Options:</label>
           {options.map((option, index) => (
             <input
               key={index}
               type="text"
-              value={option}
+              value={option || ""}
+              placeholder={`Option ${index + 1}`}
               onChange={(e) => handleOptionChange(index, e.target.value)}
               required
             />
           ))}
+        </div>
+        <div className="form-group">
+          <label>Correct Option:</label>
+          <select
+            value={correctOption || ""}
+            onChange={(e) => setCorrectOption(e.target.value)}
+            required
+          >
+            {options.map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Question Image:</label>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Question Preview"
+              className="image-preview"
+            />
+          )}
         </div>
         <button type="submit" className="submit-button">
           Update Question
