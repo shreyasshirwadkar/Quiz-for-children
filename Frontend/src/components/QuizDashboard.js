@@ -1,11 +1,10 @@
-// src/components/QuizDashboard.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import "./styles/QuizDashboard.css";
+import "./styles/QuizDashboard.css"; // Create a stylesheet for QuizDashboard
+import { FaEdit, FaTrash } from 'react-icons/fa'; // Import icons from react-icons
 
 const QuizDashboard = () => {
-  const { quizType } = useParams();
+  const { quizType } = useParams(); // Get quiz type from URL parameters
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,8 +13,16 @@ const QuizDashboard = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/v1/Question/${quizType}`);
-        setQuestions(response.data);
+        const response = await fetch(`http://localhost:8000/api/v1/question/Question/${quizType}`, {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setQuestions(data.data);
       } catch (error) {
         console.error("Error fetching questions:", error);
         setError("Error fetching questions.");
@@ -23,25 +30,33 @@ const QuizDashboard = () => {
         setLoading(false);
       }
     };
+
     fetchQuestions();
-  }, [quizType]);
+  }, [quizType]); // Re-fetch questions when quizType changes
 
   const handleEditClick = (questionId) => {
-    navigate(`/edit-question/${quizType}/${questionId}`);
+    navigate(`/edit-question/${quizType}/${questionId}`); // Example edit route
   };
 
   const handleDeleteClick = async (questionId) => {
     try {
-      await axios.get(`http://localhost:8000/api/v1/deleteQuestion/${quizType}/${questionId}`);
-      // Refresh the questions list after deleting
-      setQuestions((prevQuestions) => prevQuestions.filter((q) => q.id !== questionId));
+      const response = await fetch(`http://localhost:8000/api/v1/deleteQuestion/${quizType}/${questionId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setQuestions((prevQuestions) => prevQuestions.filter((q) => q._id !== questionId));
     } catch (error) {
       console.error("Error deleting question:", error);
     }
   };
 
   const handleAddQuestionClick = () => {
-    navigate(`/add-question/${quizType}`);
+    navigate(`/add-question/${quizType}`); // Example add question route
   };
 
   if (loading) return <p>Loading...</p>;
@@ -56,10 +71,21 @@ const QuizDashboard = () => {
       <div className="questions-list">
         {questions.length ? (
           questions.map((question) => (
-            <div key={question.id} className="question-item">
-              <h3>{question.text}</h3>
-              <button onClick={() => handleEditClick(question.id)}>Edit</button>
-              <button onClick={() => handleDeleteClick(question.id)}>Delete</button>
+            <div key={question._id} className="question-item">
+              {question.question && <img src={question.question} alt="Question" className="question-image" />}
+              <div className="question-details">
+                <div className="question-options">
+                  {question.options.map((option, index) => (
+                    <div key={index} className="question-option">
+                      {option}
+                    </div>
+                  ))}
+                </div>
+                <div className="question-actions">
+                  <FaEdit onClick={() => handleEditClick(question._id)} className="action-icon" />
+                  <FaTrash onClick={() => handleDeleteClick(question._id)} className="action-icon" />
+                </div>
+              </div>
             </div>
           ))
         ) : (

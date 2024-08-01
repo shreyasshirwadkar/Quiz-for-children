@@ -11,6 +11,8 @@ import QuestionInput from "./QuestionInput";
 import AuthPage from "./AuthPage";
 import QuizzesList from "./QuizzesList";
 import QuizDashboard from "./QuizDashboard";
+import AddQuestion  from "./AddQuestion";
+import EditQuestion from "./EditQuestion";
 
 function App() {
   return (
@@ -22,10 +24,17 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/quizzes" element={<QuizzesList />} />
-        <Route path="/quiz/:quizType" element={<QuizDashboard />} />
+        <Route
+          path="/quiz-dashboard/:quizType"
+          element={<QuizDashboard />}
+        />{" "}
+        {/* Updated path */}
         <Route path="/questioninput" element={<QuestionInput />} />
-        {/* <Route path="/edit-question/:questionId" element={<QuestionInput />} /> Implement this route if you need it */}
-        {/* <Route path="/add-question/:quizId" element={<QuestionInput />} /> Implement this route if you need it */}
+        <Route path="/add-question/:quizType" element={<AddQuestion />} />
+        <Route
+          path="/edit-question/:quizType/:questionId"
+          element={<EditQuestion />}
+        />
         <Route path="/auth" element={<AuthPage />} />
       </Routes>
     </Router>
