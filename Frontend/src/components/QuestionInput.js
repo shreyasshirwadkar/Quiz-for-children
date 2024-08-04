@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./styles/QuestionInput.css";
 import { useNavigate } from "react-router-dom";
-
+import "./styles/QuestionInput.css";
 
 const QuestionInput = () => {
   const [file, setFile] = useState(null);
@@ -10,8 +9,8 @@ const QuestionInput = () => {
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [message, setMessage] = useState("");
-  const [redirectToMenu, setRedirectToMenu] = useState(false); // State for redirection
-  const [addAnotherQuestion, setAddAnotherQuestion] = useState(false); // State for adding another question
+  const [addAnotherQuestion, setAddAnotherQuestion] = useState(false);
+  const navigate = useNavigate(); // Use useNavigate for navigation
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -48,146 +47,86 @@ const QuestionInput = () => {
           },
         }
       );
-      console.log("Question Added:", response.data);
-      setMessage("Question added successfully!");
-      setRedirectToMenu(true); // Set state to redirect after successful submission
+
+      if (response.data.success) {
+        setMessage("Question added successfully!");
+        if (addAnotherQuestion) {
+          setFile(null);
+          setType("");
+          setOptions(["", "", "", ""]);
+          setCorrectAnswer("");
+        } else {
+          navigate("/menu"); // Navigate to /menu on success
+        }
+      } else {
+        setMessage("Failed to add question. Please try again.");
+      }
     } catch (error) {
-      console.error("Error adding question:", error);
-      setMessage("Failed to add question. Please try again.");
+      setMessage("Error adding question.");
     }
   };
 
-  const handleAddAnother = () => {
-    // Reset form fields and message
-    setFile(null);
-    setType("");
-    setOptions(["", "", "", ""]);
-    setCorrectAnswer("");
-    setMessage("");
-    setAddAnotherQuestion(true);
-    setRedirectToMenu(false);  // Set state to allow adding another question
-  };
-  const navigate = useNavigate();
-
-  const handleRedirect = () => {
-    // Redirect logic here, e.g., navigate to main menu route
-    // Replace with your actual redirection mechanism (e.g., react-router's history.push)
-    console.log("Redirecting to main menu...");
-    setTimeout(() => {
-      navigate("/");
-    }, 10);    // Example redirect
-    // history.push('/main-menu'); // Uncomment if using react-router, adjust route as needed
-  };
-
-  if (redirectToMenu) {
-    return (
-      <div className="question-input-container">
-        <p>Question added successfully!</p>
-        <button onClick={handleAddAnother}>Add Another Question</button>
-        <button onClick={handleRedirect}>Go to Main Menu</button>
-      </div>
-    );
-  }
-
-  if (addAnotherQuestion) {
-    // Reset form and allow adding another question
-    return (
-      <div className="question-input-container">
-        <h2>Add Question</h2>
-        <div className="question-block">
+  return (
+    <div className="question-input-container">
+      <h2>Add New Question</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Quiz Type:</label>
           <input
             type="text"
-            placeholder="Question Type"
             value={type}
             onChange={(e) => setType(e.target.value)}
+            placeholder="Enter quiz type"
             required
           />
         </div>
-        <div className="question-block">
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="file-input"
-            accept=".jpg,.jpeg,.png,.gif"
-            required
-          />
-        </div>
-
-        {options.map((option, index) => (
-          <div key={index} className="question-block">
+        <div className="form-group">
+          <label>Options:</label>
+          {options.map((option, index) => (
             <input
+              key={index}
               type="text"
-              placeholder={`Option ${index + 1}`}
               value={option}
               onChange={(e) => handleOptionChange(index, e.target.value)}
+              placeholder={`Option ${index + 1}`}
               required
             />
-          </div>
-        ))}
-
-        <div className="question-block">
-          <input
-            type="text"
-            placeholder="Correct Answer"
+          ))}
+        </div>
+        <div className="form-group">
+          <label>Correct Option:</label>
+          <select
             value={correctAnswer}
             onChange={(e) => setCorrectAnswer(e.target.value)}
             required
-          />
+          >
+            <option value="" disabled>Select correct option</option>
+            {options.map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </div>
-
-        <button onClick={handleSubmit}>Submit</button>
-        {message && <p>{message}</p>}
-      </div>
-    );
-  }
-
-  // Default view: Add question form
-  return (
-    <div className="question-input-container">
-      <h2>Add Question</h2>
-      <div className="question-block">
-        <input
-          type="text"
-          placeholder="Question Type"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          required
-        />
-      </div>
-      <div className="question-block">
-        <input
-          type="file"
-          onChange={handleFileChange}
-          className="file-input"
-          accept=".jpg,.jpeg,.png,.gif"
-          required
-        />
-      </div>
-
-      {options.map((option, index) => (
-        <div key={index} className="question-block">
-          <input
-            type="text"
-            placeholder={`Option ${index + 1}`}
-            value={option}
-            onChange={(e) => handleOptionChange(index, e.target.value)}
-            required
-          />
+        <div className="form-group">
+          <label>Question Image:</label>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
         </div>
-      ))}
-
-      <div className="question-block">
-        <input
-          type="text"
-          placeholder="Correct Answer"
-          value={correctAnswer}
-          onChange={(e) => setCorrectAnswer(e.target.value)}
-          required
-        />
-      </div>
-
-      <button onClick={handleSubmit}>Submit</button>
-      {message && <p>{message}</p>}
+        <button type="submit" className="submit-button">
+          Submit
+        </button>
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={addAnotherQuestion}
+              onChange={() => setAddAnotherQuestion(!addAnotherQuestion)}
+            />
+            Add another question
+          </label>
+        </div>
+        {message && <p className="message">{message}</p>}
+      </form>
     </div>
   );
 };

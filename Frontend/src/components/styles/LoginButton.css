@@ -1,0 +1,20 @@
+
+.login-button {
+  position: fixed;
+  top: 20px; /* Position it at the top */
+  right: 20px; /* Position it at the right */
+  background-color: var(--primary-color); /* Use primary color from palette */
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px; /* Box shape */
+  text-align: center;
+  font-size: 19px;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.login-button:hover {
+  background-color: var(--secondary-color); /* Use secondary color from palette on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Darker shadow on hover */
+}

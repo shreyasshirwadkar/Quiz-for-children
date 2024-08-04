@@ -2,10 +2,31 @@
 
 import { Questions } from "../models/ques.models.js";
 import { User } from "../models/user.models.js";
+import mongoose from "mongoose";
 import ApiError from "../utils/apiError.utils.js";
 import asyncHandler from "../utils/asyncHandler.utils.js";
 import { ApiResponse } from "../utils/apiResponse.utils.js";
 import { uploadoncloudinary } from "../utils/cloudinary.utils.js";
+const ObjectId = mongoose.Types.ObjectId;
+
+const quizname = asyncHandler(async (req, res) => {
+    const { objectid } = req.params;
+    const user = await User.findById(req.user?._id);
+    if (!user) {
+        return new ApiError(404, "User not found");
+    }
+    const quiz = await Questions.findOne({
+        $and: [{ _id: new ObjectId(objectid) }, { owner: user._id }],
+    });
+    if (!quiz) {
+        return new ApiError(404, "Quiz not found");
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, quiz.type, "Quiz name fetched successfully")
+        );
+});
 
 const quesUpload = asyncHandler(async (req, res) => {
     const { type } = req.params;
@@ -33,8 +54,12 @@ const quesUpload = asyncHandler(async (req, res) => {
     if (!user) {
         throw new ApiError(400, "User not found");
     }
+    const ObjectId = mongoose.Types.ObjectId;
     // Check if there is already a type of question for the user
-    const typeOfQuestion = await Questions.findOne({ type, owner: user._id });
+    const typeOfQuestion = await Questions.findOne({
+        _id: new ObjectId(type),
+        owner: user._id,
+    });
     if (!typeOfQuestion) {
         throw new ApiError(400, "Type of quiz not found");
         // Create a new type of question if it doesn't exist
@@ -83,7 +108,8 @@ const randomques = asyncHandler(async (req, res) => {
     if (!type) {
         throw new ApiError(400, "Please provide type of question");
     }
-    const typeOfQuestion = await Questions.findOne({ type });
+
+    const typeOfQuestion = await Questions.findOne({ _id: new ObjectId(type) });
     if (!typeOfQuestion) {
         throw new ApiError(400, "No questions of this type exist");
     }
@@ -120,8 +146,9 @@ const correctans = asyncHandler(async (req, res) => {
     if (!question) {
         throw new ApiError(400, "Please provide question");
     }
+
     const typeOfQuestion = await Questions.findOne({
-        $and: [{ type }, { owner: own }],
+        $and: [{ _id: new ObjectId(type) }, { owner: own }],
     });
     if (!typeOfQuestion) {
         throw new ApiError(400, "No questions of this type exist");
@@ -150,8 +177,9 @@ const showQuestion = asyncHandler(async (req, res) => {
     if (!user) {
         throw new ApiError(400, "User not found");
     }
+
     const typeOfQuestion = await Questions.findOne({
-        $and: [{ type }, { owner: user._id }],
+        $and: [{ _id: new ObjectId(type) }, { owner: user._id }],
     });
     if (!typeOfQuestion) {
         throw new ApiError(400, "No questions of this type exist");
@@ -182,8 +210,9 @@ const getQuestionInfo = asyncHandler(async (req, res) => {
     if (!user) {
         throw new ApiError(400, "User not found");
     }
+
     const typeOfQuestion = await Questions.findOne({
-        $and: [{ type }, { owner: user._id }],
+        $and: [{ _id: new ObjectId(type) }, { owner: user._id }],
     });
     if (!typeOfQuestion) {
         throw new ApiError(400, "No questions of this type exist");
@@ -228,7 +257,7 @@ const updateQues = asyncHandler(async (req, res) => {
     }
 
     const typeOfQuestion = await Questions.findOne({
-        type,
+        _id: new ObjectId(type),
         owner: user._id,
     });
 
@@ -283,7 +312,7 @@ const deleteQues = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User not found");
     }
     const typeOfQuestion = await Questions.findOne({
-        $and: [{ type }, { owner: user._id }],
+        $and: [{ _id: new ObjectId(type) }, { owner: user._id }],
     });
     if (!typeOfQuestion) {
         throw new ApiError(400, "No questions of this type exist");
@@ -314,10 +343,12 @@ const getQuiztypes = asyncHandler(async (req, res) => {
     if (!quizTypes) {
         throw new ApiError(400, "No quiz types exist");
     }
-    const quizes = {};
-    quizTypes.forEach((quizType) => {
-        quizes[quizType.type] = quizType.questions.length;
-    });
+    const quizes = quizTypes.map((quizType) => ({
+        type: quizType.type,
+        url: quizType.quizTypeUrl,
+        questionCount: quizType.questions.length,
+        id: quizType._id,
+    }));
 
     return res
         .status(200)
@@ -377,7 +408,7 @@ const deleteQuizType = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User not found");
     }
     const quizType = await Questions.findOne({
-        $and: [{ type }, { owner: user._id }],
+        $and: [{ _id: new ObjectId(type) }, { owner: user._id }],
     });
     if (!quizType) {
         throw new ApiError(400, "Quiz type not found");
@@ -390,6 +421,10 @@ const deleteQuizType = asyncHandler(async (req, res) => {
 const editQuizName = asyncHandler(async (req, res) => {
     const { type } = req.params;
     const { name } = req.body;
+    const quizetypeimage = req.files?.quizTypeImage?.[0]?.path;
+    if (!quizetypeimage) {
+        throw new ApiError(400, "Please provide quiz type image");
+    }
     if (!name) {
         throw new ApiError(400, "Please provide name of quiz type");
     }
@@ -401,14 +436,22 @@ const editQuizName = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User not found");
     }
     const quizType = await Questions.findOne({
-        $and: [{ type }, { owner: user._id }],
+        $and: [{ _id: new ObjectId(type) }, { owner: user._id }],
     });
     if (!quizType) {
         throw new ApiError(400, "Quiz type not found");
     }
+    let quizUrl = quizType.quizTypeUrl;
+    if (quizetypeimage) {
+        const newImage = await uploadoncloudinary(quizetypeimage);
+        if (!newImage) {
+            throw new ApiError(400, "Failed to upload image");
+        }
+        quizUrl = newImage.url;
+    }
     const editedType = await Questions.updateOne(
         { _id: quizType._id },
-        { $set: { type: name } }
+        { $set: { type: name, quizTypeUrl: quizUrl } }
     );
     if (!editedType) {
         throw new ApiError(400, "Error inn editing the type of quiz");
@@ -429,8 +472,26 @@ const showAllQuizType = asyncHandler(async (req, res) => {
             new ApiResponse(200, quizTypes, "Quiz types fetched successfully!")
         );
 });
+const quizobject = asyncHandler(async (req, res) => {
+    const { type } = req.params;
+    if (!type) {
+        return new ApiError(400, "Invalid type");
+    }
 
+    const quiz = await Questions.findOne({
+        type: type,
+    });
+    if (!quiz) {
+        return new ApiError(404, "Quiz not found");
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, quiz._id, "Quiz object fetched successfully")
+        );
+});
 export {
+    quizname,
     quesUpload,
     randomques,
     correctans,
@@ -443,4 +504,5 @@ export {
     deleteQuizType,
     editQuizName,
     showAllQuizType,
+    quizobject,
 };

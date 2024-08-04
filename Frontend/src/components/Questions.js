@@ -12,7 +12,7 @@ export default function Questions({ question }) {
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
-    if (option === question.correct ) {
+    if (option === question.correct) {
       setIsHAPPYVisible(true);
       setTimeout(() => setIsHAPPYVisible(false), 3000);
       setIsHAPPY2Visible(true);
@@ -26,7 +26,7 @@ export default function Questions({ question }) {
 
   function shootConfetti() {
     var end = Date.now() + 1500;
-    var colors = ['#a864fd', '#29cdff', '#78ff44', '#ff718d', '#fdff6a'];
+    var colors = ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"];
 
     (function frame() {
       confetti({
@@ -34,14 +34,14 @@ export default function Questions({ question }) {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: colors
+        colors: colors,
       });
       confetti({
         particleCount: 5,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: colors
+        colors: colors,
       });
       if (Date.now() < end) {
         requestAnimationFrame(frame);
@@ -50,26 +50,25 @@ export default function Questions({ question }) {
   }
 
   return (
-    <div className="questions">
+    <div className="flex flex-col items-center p-6 shadow-xl rounded-2xl w-full max-w-xl bg-gray-200">
       <SadAnime isSAD1Visible={isSAD1Visible} />
       <Happy isHAPPYVisible={isHAPPYVisible} />
       <Happy2 isHAPPY2Visible={isHAPPY2Visible} />
-      <img src={question.question} alt="question" style={{ maxWidth: "350px", padding: "50px" }} />
-      <div className="answers-grid" style={{ width: "80%", textAlign: "center" }}>
+      <img
+        src={question.question}
+        alt="question"
+        className="max-w-4xl max-h-96 p-6 rounded-lg"
+      />
+      <div className="grid grid-cols-2 gap-6 mt-4 w-full">
         {question.options.map((option, index) => (
           <div
             key={index}
-            className={`answer-option ${selectedOption === option ? "selected" : ""}`}
+            className={`py-4 px-6 rounded-lg cursor-pointer transition-transform duration-300 transform hover:scale-105 hover:bg-blue-200 ${
+              selectedOption === option ? "bg-blue-300" : "bg-slate-300"
+            }`}
             onClick={() => handleOptionSelect(option)}
-            style={{
-              padding: "10px",
-              marginBottom: "10px",
-              borderRadius: "5px",
-              cursor: "pointer",
-              backgroundColor: selectedOption === option ? '#d3d3d3' : 'transparent'
-            }}
           >
-            <label className="text-primary" style={{ fontSize: "18px" }}>{option}</label>
+            <label className="text-2xl text-black">{option}</label>
           </div>
         ))}
       </div>
