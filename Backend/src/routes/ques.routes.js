@@ -9,6 +9,8 @@ import {
     getQuestionInfo,
     getQuiztypes,
     quesUpload,
+    quizname,
+    quizobject,
     randomques,
     showAllQuizType,
     showQuestion,
@@ -16,6 +18,7 @@ import {
 } from "../controllers/ques.controlles.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 const router = Router();
+router.route("/quizName/:objectid").get(verifyJWT, quizname);
 router.route("/postQuestion/:type").post(
     verifyJWT,
     upload.fields([
@@ -26,6 +29,7 @@ router.route("/postQuestion/:type").post(
     ]),
     quesUpload
 );
+router.route("/getQuizTypeId/:type").get(quizobject);
 router.route("/getQuestion/:type").get(randomques);
 router.route("/checkAnswer").get(correctans);
 router.route("/Question/:type").get(verifyJWT, showQuestion);
@@ -35,7 +39,16 @@ router
 router.route("/deleteQuestion/:type/:question_id").get(verifyJWT, deleteQues);
 router.route("/QuizTypes").get(verifyJWT, getQuiztypes);
 router.route("/deleteQuiz/:type").get(verifyJWT, deleteQuizType);
-router.route("/editQuizType/:type").patch(verifyJWT, editQuizName);
+router.route("/editQuizType/:type").patch(
+    verifyJWT,
+    upload.fields([
+        {
+            name: "quizTypeImage",
+            maxCount: 2,
+        },
+    ]),
+    editQuizName
+);
 router.route("/showAllQuizType").get(showAllQuizType);
 router.route("/addQuizType").post(
     verifyJWT,

@@ -1,23 +1,87 @@
+/* styles/QuizzesList.css */
+
 .quizzes-list-container {
-  text-align: center;
+  position: relative;
   padding: 20px;
+  background-color: #F8F1F1; /* Background color for the whole container */
+}
+
+.logout-button,
+.add-quiz-button {
+  position: absolute;
+  border: none;
+  padding: 8px 12px; /* Smaller padding for the smaller button */
+  cursor: pointer;
+  font-size: 14px; /* Smaller font size for the smaller button */
+  border-radius: 5px;
+  color: #F8F1F1;
+}
+
+.logout-button {
+  top: 20px;
+  right: 20px;
+  background-color: #11698E;
+}
+
+.add-quiz-button {
+  top: 20px;
+  left: 20px; /* Positioned at the top left side */
+  background-color: #16C79A;
 }
 
 .quizzes-list {
+  margin-top: 60px; /* Space for the absolute positioned buttons */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
 }
 
 .quiz-item {
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background-color: #FFFFFF;
+  border: 1px solid #19456B;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .quiz-item:hover {
-  background-color: #f0f0f0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.quiz-content {
+  padding: 15px;
+  text-align: center;
+}
+
+.quiz-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid #19456B;
+}
+
+.quiz-buttons button {
+  background-color: #11698E;
+  color: #F8F1F1;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.quiz-buttons button:hover {
+  background-color: #0d5c8c;
+  transform: scale(1.05);
 }

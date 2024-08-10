@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import "./styles/QuizDashboard.css"; // Existing stylesheet
-import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons from react-icons
-import ConfirmationModal from "./ConfirmationModal"; // Correct default import
-
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import ConfirmationModal from "./ConfirmationModal";
+import { FaArrowLeft } from "react-icons/fa";
 const QuizDashboard = () => {
-  const { quizType } = useParams(); // Get quiz type from URL parameters
+  const { id } = useParams(); // Get quiz ID from URL parameters
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +16,7 @@ const QuizDashboard = () => {
     const fetchQuestions = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/Question/${quizType}`,
+          `http://localhost:8000/api/v1/question/Question/${id}`,
           {
             credentials: "include",
           }
@@ -38,10 +37,10 @@ const QuizDashboard = () => {
     };
 
     fetchQuestions();
-  }, [quizType]); // Re-fetch questions when quizType changes
+  }, [id]);
 
   const handleEditClick = (questionId) => {
-    navigate(`/edit-question/${quizType}/${questionId}`); // Example edit route
+    navigate(`/edit-question/${id}/${questionId}`);
   };
 
   const openModal = (questionId) => {
@@ -58,7 +57,7 @@ const QuizDashboard = () => {
     if (selectedQuestionId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/deleteQuestion/${quizType}/${selectedQuestionId}`,
+          `http://localhost:8000/api/v1/question/deleteQuestion/${id}/${selectedQuestionId}`,
           {
             credentials: "include",
           }
@@ -81,7 +80,7 @@ const QuizDashboard = () => {
   };
 
   const handleAddQuestionClick = () => {
-    navigate(`/add-question/${quizType}`); // Example add question route
+    navigate(`/add-question/${id}`);
   };
 
   const handleLogout = async () => {
@@ -97,65 +96,95 @@ const QuizDashboard = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      navigate("/login"); // Redirect to login page after logout
+      navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error);
       setError("Error logging out.");
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="quiz-dashboard-container">
-      <button onClick={handleLogout} className="logout-button">
+    <div
+      className="relative p-6 min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/path-to-your-background-image.jpg')" }}
+    >
+    <div className="absolute top-4 left-4 flex items-center space-x-4">
+       
+        <button
+          onClick={() => navigate("/quizzes")}
+          className="text-blue-900 hover:text-black transition-shadow bg-zinc-200 rounded-lg p-2 mt-0 flex items-center justify-center"
+        >
+          <FaArrowLeft size={30} />
+        </button>
+      </div>
+      <button
+        onClick={handleLogout}
+        className="absolute top-2 right-2 bg-red-500 text-white font-bold py-1 px-3 w-24 rounded-lg shadow-md hover:bg-red-600 transition"
+      >
         Logout
       </button>
-      <h2>Quiz Questions</h2>
-      <button onClick={handleAddQuestionClick} className="add-question-button">
+      <h2 className="text-3xl font-bold mb-6 text-center text-white">
+        Quiz Questions
+      </h2>
+      <button
+        onClick={handleAddQuestionClick}
+        className="bg-green-500 text-white w-96 py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition font-bold text-lg mb-4 block mx-auto"
+      >
         Add New Question
       </button>
-      <div className="questions-list">
-        {questions.length ? (
-          questions.map((question) => (
-            <div key={question._id} className="question-item">
-              {question.question && (
-                <img
-                  src={question.question}
-                  alt="Question"
-                  className="question-image"
-                />
-              )}
-              <div className="question-details">
-                <div className="question-options">
+      <div className="overflow-y-auto h-[calc(100vh-200px)]">
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 pb-4">
+          {questions.length ? (
+            questions.map((question) => (
+              <div
+                key={question._id}
+                className="p-4 bg-white rounded-lg shadow-md space-y-4"
+              >
+                {question.question && (
+                  <img
+                    src={question.question}
+                    alt="Question"
+                    className="w-full h-44 object-contain rounded-md"
+                  />
+                )}
+                <div className="grid grid-cols-2 gap-4">
                   {question.options.map((option, index) => (
                     <div
                       key={index}
-                      className={`question-option ${
-                        option === question.correct ? "correct-answer" : ""
+                      className={`p-2 border rounded-md text-center ${
+                        option === question.correct
+                          ? "bg-green-200"
+                          : "bg-gray-100"
                       }`}
                     >
                       {option}
                     </div>
                   ))}
                 </div>
-                <div className="question-actions">
-                  <FaEdit
+                <div className="flex space-x-4 mt-4 justify-center">
+                  <button
                     onClick={() => handleEditClick(question._id)}
-                    className="action-icon"
-                  />
-                  <FaTrash
+                    className="text-blue-500 hover:text-white transition bg-blue-200 px-4 py-2 rounded-md hover:bg-blue-700"
+                  >
+                    
+                    <FaEdit size={20} /> 
+                  </button>
+                  <button
                     onClick={() => openModal(question._id)}
-                    className="action-icon"
-                  />
+                    className="text-red-500 hover:text-white transition bg-red-200 px-4 py-2 rounded-md hover:bg-red-700"
+                  >
+                    <FaTrash size={20} />
+                  </button>
                 </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p>No questions available.</p>
-        )}
+            ))
+          ) : (
+            <p className="text-center text-2xl font-bold text-gray-500 bg-white rounded-md">No questions available.</p>
+          )}
+        </div>
       </div>
       <ConfirmationModal
         isOpen={modalOpen}
