@@ -105,33 +105,54 @@ const quesUpload = asyncHandler(async (req, res) => {
 });
 const randomques = asyncHandler(async (req, res) => {
     const { type } = req.params;
+    const { displayedQuestionIds, maxQuestions } = req.body; // Accept displayedQuestionIds and maxQuestions from the frontend
+
     if (!type) {
-        throw new ApiError(400, "Please provide type of question");
+        throw new ApiError(400, "Please provide the type of question.");
     }
 
     const typeOfQuestion = await Questions.findOne({ _id: new ObjectId(type) });
     if (!typeOfQuestion) {
-        throw new ApiError(400, "No questions of this type exist");
+        throw new ApiError(400, "No questions of this type exist.");
     }
-    const randomques =
-        typeOfQuestion.questions[
-            Math.floor(Math.random() * typeOfQuestion.questions.length)
-        ];
-    if (!randomques) {
-        throw new ApiError(400, "Error in finding random question");
-    }
-    const questionWithoutCorrect = randomques;
-    return res
-        .status(200)
 
-        .json(
-            new ApiResponse(
-                200,
-                { questionWithoutCorrect },
-                "Random question found"
-            )
+    const availableQuestions = typeOfQuestion.questions.filter(
+        (question) => !displayedQuestionIds.includes(question._id.toString())
+    );
+
+    if (availableQuestions.length === 0) {
+        return res.status(200).json(
+            new ApiResponse(200, {}, "No more unique questions available.")
         );
+    }
+
+    // Limit the number of questions to maxQuestions
+    const remainingQuestionsToReturn = maxQuestions - displayedQuestionIds.length;
+
+    if (remainingQuestionsToReturn <= 0) {
+        return res.status(200).json(
+            new ApiResponse(200, {}, "Maximum number of questions reached.")
+        );
+    }
+
+    // Select a random question from the available questions
+    const randomques =
+        availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+
+    if (!randomques) {
+        throw new ApiError(400, "Error in finding a random question.");
+    }
+
+    const questionWithoutCorrect = randomques;
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            { questionWithoutCorrect },
+            "Random question found"
+        )
+    );
 });
+
 const correctans = asyncHandler(async (req, res) => {
     const { type, question, selectedOption, own } = req.query;
     if (!own) {

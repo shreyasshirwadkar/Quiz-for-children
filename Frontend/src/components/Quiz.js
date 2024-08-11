@@ -9,21 +9,32 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [displayedQuestionIds, setDisplayedQuestionIds] = useState([]); // Track displayed question IDs
+  const [maxReached, setMaxReached] = useState(false); // Track if max questions reached
+  const maxQuestions = 5; // Maximum number of questions to display
 
   const fetchQuestion = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `http://localhost:8000/api/v1/question/getQuestion/${id}`
+      const response = await axios.post(
+        `http://localhost:8000/api/v1/question/getQuestion/${id}`,
+        { displayedQuestionIds, maxQuestions } // Pass displayed question IDs and max number
       );
 
-      if (response.data.data && response.data.data.questionWithoutCorrect) {
+      const questionData = response.data.data?.questionWithoutCorrect;
+
+      if (questionData) {
         setQuestions((prevQuestions) => [
           ...prevQuestions,
-          response.data.data.questionWithoutCorrect,
+          questionData,
+        ]);
+        setDisplayedQuestionIds((prevIds) => [
+          ...prevIds,
+          questionData._id,
         ]);
       } else {
-        throw new Error("No question found in response.");
+        console.log("No more unique questions available or max limit reached.");
+        setMaxReached(true); // Set maxReached to true if no more questions are available
       }
     } catch (error) {
       console.error("Error fetching question:", error);
@@ -37,28 +48,42 @@ export default function Quiz() {
   }, [id]);
 
   const handleNext = async () => {
+    // Check if the current question is the last in the array
     if (currentQuestionIndex === questions.length - 1) {
-      await fetchQuestion();
+      if (questions.length >= maxQuestions) {
+        setMaxReached(true); // Set maxReached to true if the limit is reached
+        return;
+      }
+      await fetchQuestion(); // Fetch more questions
+      // If a new question is fetched, set the index to the last question in the updated questions array
+      setCurrentQuestionIndex(questions.length); // Move to the new question
+      return;
     }
-    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    
+    // Increment the current question index if not at the last question
+    setCurrentQuestionIndex((prevIndex) => Math.min(prevIndex + 1, questions.length - 1));
   };
 
   const handlePrev = () => {
-    setCurrentQuestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    setCurrentQuestionIndex((prevIndex) => Math.max(prevIndex - 1, 0)); // Ensure index doesn't go below zero
   };
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen  p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <Link
         to="/"
-        className="absolute top-4 left-4 text-blue-900 hover:text-black transition shadow-md bg-zinc-200	 rounded-lg py-2 px-2"
+        className="absolute top-4 left-4 text-blue-900 hover:text-black transition shadow-md bg-zinc-200 rounded-lg py-2 px-2"
       >
         <FaHome size={40} />
       </Link>
       {loading && questions.length === 0 ? (
         <p className="text-gray-500">Loading questions...</p>
+      ) : maxReached ? (
+        <p className="text-gray-500 text-4xl bg-white py-2 px-2 font-bold">
+          Maximum number of questions attended.
+        </p>
       ) : currentQuestion ? (
         <>
           <Questions question={currentQuestion} />

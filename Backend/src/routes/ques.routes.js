@@ -30,7 +30,7 @@ router.route("/postQuestion/:type").post(
     quesUpload
 );
 router.route("/getQuizTypeId/:type").get(quizobject);
-router.route("/getQuestion/:type").get(randomques);
+router.route("/getQuestion/:type").post(randomques);
 router.route("/checkAnswer").get(correctans);
 router.route("/Question/:type").get(verifyJWT, showQuestion);
 router
