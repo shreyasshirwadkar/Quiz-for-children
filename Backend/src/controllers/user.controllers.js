@@ -61,7 +61,7 @@ const logInUser=asyncHandler(async(req,res)=>{
 const Options={
     httpOnly: false, // Add the HttpOnly flag
     secure: true, // Add the secure flag if applicable
-    sameSite: 'Lax',
+    sameSite: 'None',
 }
     return res.status(200)
     .header("Access-Control-Allow-Credentials", true)
