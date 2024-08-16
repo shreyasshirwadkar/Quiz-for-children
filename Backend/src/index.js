@@ -1,10 +1,7 @@
-import express from "express";
-import ConnectDB from "../db/index.js"; 
 import dotenv from "dotenv";
 import app from "./app.js"; // Import the app instance
-
+import ConnectDB from "./src/db/index.js";
 dotenv.config(); 
-
 ConnectDB()
   .then(() => {
     console.log("MONGODB Connection Successful");
