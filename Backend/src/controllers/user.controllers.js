@@ -59,8 +59,10 @@ const logInUser=asyncHandler(async(req,res)=>{
     const{accessToken,refreshAccessToken}=await generateTokens(user._id)
     const loggedinuser=await User.findById(user._id).select("-password -refreshAccesstoken")//This is optional so that
 const Options={
-    httpOnly:true,
-    secure:true
+    httpOnly: true,
+        partitioned:true,
+        secure: true,
+        sameSite:'Lax',
 }
     return res.status(200)
     .cookie("accessToken",accessToken,Options)
