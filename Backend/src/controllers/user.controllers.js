@@ -64,6 +64,7 @@ const Options={
     sameSite: 'Lax',
 }
     return res.status(200)
+    .header("Access-Control-Allow-Credentials", true)
     .cookie("accessToken",accessToken,Options)
     .cookie("refreshAccessToken",refreshAccessToken,Options)
     .json(new ApiResponse(200,logInUser,"User logged in successfully"))
