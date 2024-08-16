@@ -59,7 +59,7 @@ const logInUser=asyncHandler(async(req,res)=>{
     const{accessToken,refreshAccessToken}=await generateTokens(user._id)
     const loggedinuser=await User.findById(user._id).select("-password -refreshAccesstoken")//This is optional so that
 const Options={
-    httpOnly: true, // Add the HttpOnly flag
+    httpOnly: false, // Add the HttpOnly flag
     secure: true, // Add the secure flag if applicable
     sameSite: 'Lax',
 }
