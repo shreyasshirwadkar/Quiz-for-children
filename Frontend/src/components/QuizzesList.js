@@ -18,7 +18,7 @@ const QuizzesList = () => {
     const fetchQuizzes = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/v1/question/QuizTypes",
+          "https://quiz-for-children-1.onrender.com/api/v1/question/QuizTypes",
           {
             credentials: "include",
           }
@@ -50,7 +50,7 @@ const QuizzesList = () => {
   };
 
   const handleLogout = () => {
-    fetch("http://localhost:8000/api/v1/auth/logout", {
+    fetch("https://quiz-for-children-1.onrender.com/api/v1/auth/logout", {
       method: "POST",
       credentials: "include",
     })
@@ -84,7 +84,7 @@ const QuizzesList = () => {
     if (quizToDelete) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/deleteQuiz/${quizToDelete.id}`,
+          `https://quiz-for-children-1.onrender.com/api/v1/question/deleteQuiz/${quizToDelete.id}`,
           {
             credentials: "include",
           }
@@ -116,7 +116,7 @@ const QuizzesList = () => {
       }
 
       const response = await fetch(
-        `http://localhost:8000/api/v1/question/editQuizType/${quiz.id}`,
+        `https://quiz-for-children-1.onrender.com/api/v1/question/editQuizType/${quiz.id}`,
         {
           method: "PATCH",
           body: formData,

@@ -16,7 +16,7 @@ const EditQuestion = () => {
     const fetchQuestionDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/Questioninfo/${id}/${questionId}`,
+          `https://quiz-for-children-1.onrender.com/api/v1/question/Questioninfo/${id}/${questionId}`,
           {
             credentials: "include",
           }
@@ -65,7 +65,7 @@ const EditQuestion = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/question/updateQues/${id}/${questionId}`,
+        `https://quiz-for-children-1.onrender.com/api/v1/question/updateQues/${id}/${questionId}`,
         {
           method: "POST",
           body: formData,

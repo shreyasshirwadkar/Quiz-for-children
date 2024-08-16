@@ -12,7 +12,7 @@ const Main = () => {
     const fetchQuizTopics = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/v1/question/showAllQuizType",
+          "https://quiz-for-children-1.onrender.com/api/v1/question/showAllQuizType",
           {
             credentials: "include",
           }
@@ -38,7 +38,7 @@ const Main = () => {
   const handleQuizClick = async (type) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/question/getQuizTypeId/${type}`
+        `https://quiz-for-children-1.onrender.com/api/v1/question/getQuizTypeId/${type}`
       );
 
       if (!response.ok) {

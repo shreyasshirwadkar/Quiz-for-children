@@ -16,7 +16,7 @@ const QuizDashboard = () => {
     const fetchQuestions = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/Question/${id}`,
+          `https://quiz-for-children-1.onrender.com/api/v1/question/Question/${id}`,
           {
             credentials: "include",
           }
@@ -57,7 +57,7 @@ const QuizDashboard = () => {
     if (selectedQuestionId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/deleteQuestion/${id}/${selectedQuestionId}`,
+          `https://quiz-for-children-1.onrender.com/api/v1/question/deleteQuestion/${id}/${selectedQuestionId}`,
           {
             credentials: "include",
           }
@@ -86,7 +86,7 @@ const QuizDashboard = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/users/logoutUser",
+        "https://quiz-for-children-1.onrender.com/api/v1/users/logoutUser",
         {
           credentials: "include",
         }

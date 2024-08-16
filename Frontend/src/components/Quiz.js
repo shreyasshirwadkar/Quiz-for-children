@@ -17,7 +17,7 @@ export default function Quiz() {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://localhost:8000/api/v1/question/getQuestion/${id}`,
+        `https://quiz-for-children-1.onrender.com/api/v1/question/getQuestion/${id}`,
         { displayedQuestionIds, maxQuestions } // Pass displayed question IDs and max number
       );
 

@@ -12,7 +12,7 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/api/v1/users/registerUser", {
+      const response = await axios.post("https://quiz-for-children-1.onrender.com/api/v1/users/registerUser", {
         userName: name,
         password: password
       });
