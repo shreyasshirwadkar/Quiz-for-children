@@ -21,6 +21,11 @@ const QuizzesList = () => {
           "https://quiz-for-children-1.onrender.com/api/v1/question/QuizTypes",
           {
             credentials: "include",
+            headers:{
+              'Content-Type': 'multipart/form-data',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Credentials':true,
+            }
           }
         );
 
