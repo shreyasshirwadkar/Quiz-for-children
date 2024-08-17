@@ -7,10 +7,17 @@ const Main = () => {
   const [quizTopics, setQuizTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
 
   useEffect(() => {
     const fetchQuizTopics = async () => {
       try {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          setLoadingPercentage((prev) => (prev < 90 ? prev + 10 : prev));
+        }, 100);
+
         const response = await fetch(
           "https://quiz-for-children-1.onrender.com/api/v1/question/showAllQuizType",
           {
@@ -23,6 +30,8 @@ const Main = () => {
         }
 
         const data = await response.json();
+        clearInterval(interval);
+        setLoadingPercentage(100);
         setQuizTopics(data.data);
       } catch (error) {
         console.error("Error fetching quiz types:", error);
@@ -46,8 +55,8 @@ const Main = () => {
       }
 
       const data = await response.json();
-      const quizTypeId = data.data; // The ID is directly in data.data
-      navigate(`/quiz/${quizTypeId}`); // Navigate using quiz type ID
+      const quizTypeId = data.data;
+      navigate(`/quiz/${quizTypeId}`);
     } catch (error) {
       console.error("Error fetching quiz type ID:", error);
     }
@@ -55,8 +64,16 @@ const Main = () => {
 
   if (loading) {
     return (
-      <div className="relative w-full h-2 bg-gray-200">
-        <div className="absolute left-0 top-0 h-full bg-green-500 animate-pulse" style={{ width: '100%' }}></div>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="w-64 bg-gray-200 h-4 rounded-full overflow-hidden mb-4">
+          <div
+            className="bg-green-500 h-full"
+            style={{ width: `${loadingPercentage}%` }}
+          ></div>
+        </div>
+        <p className="text-white text-xl font-semibold">
+          Loading... {loadingPercentage}%
+        </p>
       </div>
     );
   }
