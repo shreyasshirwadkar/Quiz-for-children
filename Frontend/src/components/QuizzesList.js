@@ -60,8 +60,7 @@ const QuizzesList = () => {
   };
 
   const handleLogout = () => {
-    fetch("https://quiz-for-children-1.onrender.com/api/v1/auth/logout", {
-      method: "POST",
+    fetch("https://quiz-for-children-1.onrender.com/api/v1/users/logoutUser", {
       credentials: "include",
     })
       .then(() => {
