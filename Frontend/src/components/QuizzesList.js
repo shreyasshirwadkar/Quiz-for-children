@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ConfirmationModal from "./ConfirmationModal";
 import EditQuizModal from "./EditQuizModal";
-import { FaHome} from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 
 const QuizzesList = () => {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ const QuizzesList = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [quizToDelete, setQuizToDelete] = useState(null);
   const [quizToEdit, setQuizToEdit] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -21,7 +22,6 @@ const QuizzesList = () => {
           "https://quiz-for-children-1.onrender.com/api/v1/question/QuizTypes",
           {
             credentials: "include",
-            
           }
         );
 
@@ -51,14 +51,22 @@ const QuizzesList = () => {
   };
 
   const handleLogout = () => {
+    setLoggingOut(true);
     fetch("https://quiz-for-children-1.onrender.com/api/v1/auth/logout", {
       method: "POST",
       credentials: "include",
     })
       .then(() => {
-        navigate("/login");
+        navigate("/login", { replace: true });
+        window.history.pushState(null, null, "/login"); // Clear history stack
+        window.onpopstate = () => {
+          navigate("/login", { replace: true });
+        };
       })
-      .catch((error) => console.error("Logout failed:", error));
+      .catch((error) => {
+        console.error("Logout failed:", error);
+        setLoggingOut(false);
+      });
   };
 
   const openDeleteModal = (quiz) => {
@@ -149,7 +157,12 @@ const QuizzesList = () => {
     }
   };
 
-  if (loading) return <p className="text-center text-gray-600">Loading...</p>;
+  if (loading || loggingOut) return (
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+      <div className="text-white text-xl font-bold">Loading...</div>
+    </div>
+  );
+
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
@@ -165,7 +178,6 @@ const QuizzesList = () => {
           >
             <FaHome size={30} />
           </Link>
-          
         </div>
         <button
           onClick={handleLogout}
@@ -233,27 +245,25 @@ const QuizzesList = () => {
                   </div>
                 ))
               ) : (
-                <p className="col-span-full text-center text-gray-600">
-                  No quizzes found.
-                </p>
+                <p className="text-center text-white">No quizzes available.</p>
               )}
             </div>
           </div>
         </div>
-        <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={closeDeleteModal}
-          onConfirm={handleDeleteQuiz}
-        />
-        {isEditModalOpen && (
-          <EditQuizModal
-            isOpen={isEditModalOpen}
-            onClose={closeEditModal}
-            onConfirm={handleEditQuizName}
-            quiz={quizToEdit}
-          />
-        )}
       </div>
+      {isDeleteModalOpen && (
+        <ConfirmationModal
+          onConfirm={handleDeleteQuiz}
+          onCancel={closeDeleteModal}
+        />
+      )}
+      {isEditModalOpen && (
+        <EditQuizModal
+          quiz={quizToEdit}
+          onEdit={handleEditQuizName}
+          onClose={closeEditModal}
+        />
+      )}
     </div>
   );
 };
