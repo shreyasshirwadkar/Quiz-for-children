@@ -12,7 +12,13 @@ Welcome to our Interactive Quiz Platform designed specifically for children with
 ### Multiple-Choice Answers: Questions are presented with four multiple-choice options.
 ### Quiz Selection: Users can select and attempt various quizzes from the platform.
 ### User-Friendly Interface: Designed to be intuitive and easy to navigate for children with hearing and speech impairments.
-
+## Authentication and Authorization
+### User Registration
+### Register a New User: New users can sign up by providing a username and password. If the ### username already exists, an error message will be shown.
+### User Login
+### Log In: Users log in using their username and password. Upon successful authentication, ### access and refresh tokens are generated and stored in cookies.
+### User Logout
+### Log Out: Users can log out, which clears the authentication cookies and invalidates the ### session.
 ## Usage
 ### Main Page
 ### Login/Signup: Click the "Login" button to navigate to the authentication page where you can log in or sign up.
@@ -24,5 +30,10 @@ Welcome to our Interactive Quiz Platform designed specifically for children with
 
 ### Admin Features
 ### Add/Edit Questions: Admin users can add new questions or edit existing ones for each quiz.
+
 ### Delete Questions: Admin users can delete questions with a confirmation prompt.
+
+### Add/Edit Quiz Types: Admin users can add new quiz types or edit existing ones, including ### uploading quiz images.
+
+### Delete Quiz Types: Admin users can delete quiz types, which will also remove all associated ### questions.
 
