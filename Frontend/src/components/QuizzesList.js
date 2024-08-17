@@ -8,16 +8,24 @@ const QuizzesList = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPercentage, setLoadingPercentage] = useState(0); // Loading percentage state
   const [error, setError] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [quizToDelete, setQuizToDelete] = useState(null);
   const [quizToEdit, setQuizToEdit] = useState(null);
-  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
+        setLoading(true);
+        setLoadingPercentage(0);
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          setLoadingPercentage((prev) => (prev < 90 ? prev + 10 : prev));
+        }, 100);
+
         const response = await fetch(
           "https://quiz-for-children-1.onrender.com/api/v1/question/QuizTypes",
           {
@@ -31,6 +39,7 @@ const QuizzesList = () => {
 
         const data = await response.json();
         setQuizzes(data.data || []);
+        setLoadingPercentage(100);
       } catch (error) {
         console.error("Error fetching quizzes:", error);
         setError("Error fetching quizzes.");
@@ -51,22 +60,14 @@ const QuizzesList = () => {
   };
 
   const handleLogout = () => {
-    setLoggingOut(true);
     fetch("https://quiz-for-children-1.onrender.com/api/v1/auth/logout", {
       method: "POST",
       credentials: "include",
     })
       .then(() => {
-        navigate("/login", { replace: true });
-        window.history.pushState(null, null, "/login"); // Clear history stack
-        window.onpopstate = () => {
-          navigate("/login", { replace: true });
-        };
+        navigate("/login");
       })
-      .catch((error) => {
-        console.error("Logout failed:", error);
-        setLoggingOut(false);
-      });
+      .catch((error) => console.error("Logout failed:", error));
   };
 
   const openDeleteModal = (quiz) => {
@@ -157,13 +158,25 @@ const QuizzesList = () => {
     }
   };
 
-  if (loading || loggingOut) return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-      <div className="text-white text-xl font-bold">Loading...</div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="w-64 bg-gray-200 h-4 rounded-full overflow-hidden mb-4">
+          <div
+            className="bg-green-500 h-full"
+            style={{ width: `${loadingPercentage}%` }}
+          ></div>
+        </div>
+        <p className="text-gray-500 text-xl font-semibold">
+          Loading... {loadingPercentage}%
+        </p>
+      </div>
+    );
+  }
 
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (error) {
+    return <p className="text-center text-red-600">{error}</p>;
+  }
 
   return (
     <div
@@ -192,7 +205,7 @@ const QuizzesList = () => {
 
           <button
             onClick={handleAddQuizClick}
-            className="bg-cyan-600 text-white py-2 px-4 w-96 rounded-lg shadow-2xl hover:bg-cyan-900  transition font-bold text-xl mb-4"
+            className="bg-cyan-600 text-white py-2 px-4 w-96 rounded-lg shadow-2xl hover:bg-cyan-900 transition font-bold text-xl mb-4"
           >
             Add Quiz
           </button>
@@ -245,25 +258,27 @@ const QuizzesList = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-center text-white">No quizzes available.</p>
+                <p className="col-span-full text-center text-gray-600">
+                  No quizzes found.
+                </p>
               )}
             </div>
           </div>
         </div>
-      </div>
-      {isDeleteModalOpen && (
         <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={closeDeleteModal}
           onConfirm={handleDeleteQuiz}
-          onCancel={closeDeleteModal}
         />
-      )}
-      {isEditModalOpen && (
-        <EditQuizModal
-          quiz={quizToEdit}
-          onEdit={handleEditQuizName}
-          onClose={closeEditModal}
-        />
-      )}
+        {isEditModalOpen && (
+          <EditQuizModal
+            isOpen={isEditModalOpen}
+            onClose={closeEditModal}
+            onEdit={handleEditQuizName}
+            quiz={quizToEdit}
+          />
+        )}
+      </div>
     </div>
   );
 };
