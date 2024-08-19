@@ -9,6 +9,7 @@ export default function Quiz() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingPercentage, setLoadingPercentage] = useState(0); // Loading percentage state
   const [displayedQuestionIds, setDisplayedQuestionIds] = useState([]); // Track displayed question IDs
   const [maxReached, setMaxReached] = useState(false); // Track if max questions reached
   const maxQuestions = 5; // Maximum number of questions to display
@@ -16,8 +17,15 @@ export default function Quiz() {
   const fetchQuestion = async () => {
     try {
       setLoading(true);
+      setLoadingPercentage(0);
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        setLoadingPercentage((prev) => (prev < 90 ? prev + 10 : prev));
+      }, 100);
+
       const response = await axios.post(
-        `http://localhost:8000/api/v1/question/getQuestion/${id}`,
+        `https://quiz-for-children-1.onrender.com/api/v1/question/getQuestion/${id}`,
         { displayedQuestionIds, maxQuestions } // Pass displayed question IDs and max number
       );
 
@@ -36,6 +44,9 @@ export default function Quiz() {
         console.log("No more unique questions available or max limit reached.");
         setMaxReached(true); // Set maxReached to true if no more questions are available
       }
+
+      clearInterval(interval);
+      setLoadingPercentage(100);
     } catch (error) {
       console.error("Error fetching question:", error);
     } finally {
@@ -48,18 +59,16 @@ export default function Quiz() {
   }, [id]);
 
   const handleNext = async () => {
-    // Check if the current question is the last in the array
     if (currentQuestionIndex === questions.length - 1) {
       if (questions.length >= maxQuestions) {
         setMaxReached(true); // Set maxReached to true if the limit is reached
         return;
       }
       await fetchQuestion(); // Fetch more questions
-      // If a new question is fetched, set the index to the last question in the updated questions array
       setCurrentQuestionIndex(questions.length); // Move to the new question
       return;
     }
-    
+
     // Increment the current question index if not at the last question
     setCurrentQuestionIndex((prevIndex) => Math.min(prevIndex + 1, questions.length - 1));
   };
@@ -78,8 +87,19 @@ export default function Quiz() {
       >
         <FaHome size={40} />
       </Link>
-      {loading && questions.length === 0 ? (
-        <p className="text-gray-500">Loading questions...</p>
+
+      {loading ? (
+        <div className="flex flex-col items-center">
+          <div className="w-64 bg-gray-200 h-4 rounded-full overflow-hidden mb-4">
+            <div
+              className="bg-green-500 h-full"
+              style={{ width: `${loadingPercentage}%` }}
+            ></div>
+          </div>
+          <p className="text-gray-500 text-xl font-semibold">
+            Loading... {loadingPercentage}%
+          </p>
+        </div>
       ) : maxReached ? (
         <p className="text-gray-500 text-4xl bg-white py-2 px-2 font-bold">
           Maximum number of questions attended.

@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ConfirmationModal from "./ConfirmationModal";
 import EditQuizModal from "./EditQuizModal";
-import { FaHome} from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 
 const QuizzesList = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPercentage, setLoadingPercentage] = useState(0); // Loading percentage state
   const [error, setError] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -17,8 +18,16 @@ const QuizzesList = () => {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
+        setLoading(true);
+        setLoadingPercentage(0);
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          setLoadingPercentage((prev) => (prev < 90 ? prev + 10 : prev));
+        }, 100);
+
         const response = await fetch(
-          "http://localhost:8000/api/v1/question/QuizTypes",
+          "https://quiz-for-children-1.onrender.com/api/v1/question/QuizTypes",
           {
             credentials: "include",
           }
@@ -30,6 +39,7 @@ const QuizzesList = () => {
 
         const data = await response.json();
         setQuizzes(data.data || []);
+        setLoadingPercentage(100);
       } catch (error) {
         console.error("Error fetching quizzes:", error);
         setError("Error fetching quizzes.");
@@ -50,8 +60,7 @@ const QuizzesList = () => {
   };
 
   const handleLogout = () => {
-    fetch("http://localhost:8000/api/v1/auth/logout", {
-      method: "POST",
+    fetch("https://quiz-for-children-1.onrender.com/api/v1/users/logoutUser", {
       credentials: "include",
     })
       .then(() => {
@@ -84,7 +93,7 @@ const QuizzesList = () => {
     if (quizToDelete) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/deleteQuiz/${quizToDelete.id}`,
+          `https://quiz-for-children-1.onrender.com/api/v1/question/deleteQuiz/${quizToDelete.id}`,
           {
             credentials: "include",
           }
@@ -116,7 +125,7 @@ const QuizzesList = () => {
       }
 
       const response = await fetch(
-        `http://localhost:8000/api/v1/question/editQuizType/${quiz.id}`,
+        `https://quiz-for-children-1.onrender.com/api/v1/question/editQuizType/${quiz.id}`,
         {
           method: "PATCH",
           body: formData,
@@ -148,8 +157,25 @@ const QuizzesList = () => {
     }
   };
 
-  if (loading) return <p className="text-center text-gray-600">Loading...</p>;
-  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="w-64 bg-gray-200 h-4 rounded-full overflow-hidden mb-4">
+          <div
+            className="bg-green-500 h-full"
+            style={{ width: `${loadingPercentage}%` }}
+          ></div>
+        </div>
+        <p className="text-gray-500 text-xl font-semibold">
+          Loading... {loadingPercentage}%
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <p className="text-center text-red-600">{error}</p>;
+  }
 
   return (
     <div
@@ -164,7 +190,6 @@ const QuizzesList = () => {
           >
             <FaHome size={30} />
           </Link>
-          
         </div>
         <button
           onClick={handleLogout}
@@ -179,7 +204,7 @@ const QuizzesList = () => {
 
           <button
             onClick={handleAddQuizClick}
-            className="bg-cyan-600 text-white py-2 px-4 w-96 rounded-lg shadow-2xl hover:bg-cyan-900  transition font-bold text-xl mb-4"
+            className="bg-cyan-600 text-white py-2 px-4 w-96 rounded-lg shadow-2xl hover:bg-cyan-900 transition font-bold text-xl mb-4"
           >
             Add Quiz
           </button>
@@ -248,7 +273,7 @@ const QuizzesList = () => {
           <EditQuizModal
             isOpen={isEditModalOpen}
             onClose={closeEditModal}
-            onConfirm={handleEditQuizName}
+            onEdit={handleEditQuizName}
             quiz={quizToEdit}
           />
         )}

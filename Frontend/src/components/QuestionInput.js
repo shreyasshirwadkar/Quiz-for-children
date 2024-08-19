@@ -38,7 +38,7 @@ const QuestionInput = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/v1/question/postQuestion",
+        "https://quiz-for-children-1.onrender.com/api/v1/question/postQuestion",
         formData,
         {
           withCredentials: true,

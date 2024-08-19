@@ -7,12 +7,19 @@ const Main = () => {
   const [quizTopics, setQuizTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
 
   useEffect(() => {
     const fetchQuizTopics = async () => {
       try {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          setLoadingPercentage((prev) => (prev < 90 ? prev + 10 : prev));
+        }, 100);
+
         const response = await fetch(
-          "http://localhost:8000/api/v1/question/showAllQuizType",
+          "https://quiz-for-children-1.onrender.com/api/v1/question/showAllQuizType",
           {
             credentials: "include",
           }
@@ -23,6 +30,8 @@ const Main = () => {
         }
 
         const data = await response.json();
+        clearInterval(interval);
+        setLoadingPercentage(100);
         setQuizTopics(data.data);
       } catch (error) {
         console.error("Error fetching quiz types:", error);
@@ -38,7 +47,7 @@ const Main = () => {
   const handleQuizClick = async (type) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/question/getQuizTypeId/${type}`
+        `https://quiz-for-children-1.onrender.com/api/v1/question/getQuizTypeId/${type}`
       );
 
       if (!response.ok) {
@@ -46,14 +55,29 @@ const Main = () => {
       }
 
       const data = await response.json();
-      const quizTypeId = data.data; // The ID is directly in data.data
-      navigate(`/quiz/${quizTypeId}`); // Navigate using quiz type ID
+      const quizTypeId = data.data;
+      navigate(`/quiz/${quizTypeId}`);
     } catch (error) {
       console.error("Error fetching quiz type ID:", error);
     }
   };
 
-  if (loading) return <p className="text-white text-center">Loading...</p>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="w-64 bg-gray-200 h-4 rounded-full overflow-hidden mb-4">
+          <div
+            className="bg-green-500 h-full"
+            style={{ width: `${loadingPercentage}%` }}
+          ></div>
+        </div>
+        <p className="text-white text-xl font-semibold">
+          Loading... {loadingPercentage}%
+        </p>
+      </div>
+    );
+  }
+
   if (error) return <p className="text-white text-center">{error}</p>;
 
   return (
@@ -63,9 +87,9 @@ const Main = () => {
     >
       <div className="flex flex-col h-full">
         <div className="flex justify-end p-4">
-        <Link to="/auth" className="absolute top-4 right-4 bg-blue-500 text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors duration-300">
-  Login
-</Link>
+          <Link to="/auth" className="absolute top-4 right-4 bg-blue-500 text-white text-xl font-bold py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors duration-300">
+            Login
+          </Link>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center">
           <h1 className="text-4xl font-bold text-white mb-8 bg-green-900 rounded-lg py-4 px-4">Select a Quiz</h1>
@@ -80,7 +104,7 @@ const Main = () => {
                   <img
                     src={quiz.quizTypeUrl}
                     alt={quiz.type}
-                    className="w-full h-40 object-cover rounded-md mb-4 "
+                    className="w-full h-40 object-cover rounded-md mb-4"
                   />
                   <h3 className="text-lg font-semibold text-gray-800">
                     {quiz.type}

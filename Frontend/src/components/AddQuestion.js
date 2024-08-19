@@ -22,7 +22,7 @@ const AddQuestion = () => {
     const fetchQuizInfo = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/v1/question/quizName/${id}`,
+          `https://quiz-for-children-1.onrender.com/api/v1/question/quizName/${id}`,
           {
             credentials: "include",
           }
@@ -70,7 +70,7 @@ const AddQuestion = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/question/postQuestion/${id}`,
+        `https://quiz-for-children-1.onrender.com/api/v1/question/postQuestion/${id}`,
         {
           method: "POST",
           body: formData,
